@@ -36,7 +36,7 @@ module Homework
         y1=1
         x2=1
         y2=1
-call        omp_set_num_threads(2)
+
         
 !$OMP PARALLEL  DO  SCHEDULE(dynamic) private(L,R,current_column,current_sum,Up,Down)
  
