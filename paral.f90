@@ -31,7 +31,7 @@ module Homework
         allocate(current_column(m))
 
 
-        max_sum=0
+        max_sum=-1e+25
         x1=1
         y1=1
         x2=1
