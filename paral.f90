@@ -27,12 +27,12 @@ module Homework
         endif
 
         allocate(current_column(m))
-        max_sum=minval(A)
+        max_sum=-huge(0d0)
         x1=1
         y1=1
         x2=1
         y2=1
-        
+!call        omp_set_num_threads(1)
 !$OMP PARALLEL
     !$OMP single
             amount_of_threads=omp_get_num_threads()
@@ -73,7 +73,7 @@ module Homework
         deallocate(current_column)
         max_sum=maxval(max_sum_arr)
         
-        do i=1,16
+        do i=1,amount_of_threads
             if(max_sum_arr(i)==max_sum) then
                  exit
             endif
@@ -131,6 +131,10 @@ module Homework
             enddo
      end subroutine FindMaxInArray
 end module Homework
+
+
+
+
 
 
 
