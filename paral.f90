@@ -32,7 +32,7 @@ module Homework
         y1=1
         x2=1
         y2=1
-!call        omp_set_num_threads(1)
+
 !$OMP PARALLEL
     !$OMP single
             amount_of_threads=omp_get_num_threads()
