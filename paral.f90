@@ -6,13 +6,13 @@ module Homework
         implicit none
         real(8),  dimension(:,:) :: A
         integer(4), intent(out) :: x1, y1, x2, y2
-        integer(4) :: n, L, R, Up, Down, m, tmp
-        real(8), allocatable :: current_column(:), B(:,:)
-        real(8) :: current_sum, max_sum
-        logical :: transpos
+        integer(4) :: n, L, R, Up, Down, m, tmp,otr1,otr2,num_thread,i,amount_of_threads
+        real(8), allocatable :: current_column(:),max_sum_arr(:), B(:,:)
+        real(8) :: current_sum, max_sum,A_min,count1,count2
+        logical :: transpos,otr
 !         real(8), allocatable, dimension(:) :: max_sum   
-        integer(4), allocatable, dimension(:):: X_1, X_2, Y_1, Y_2
-
+        integer(4), allocatable, dimension(:):: X_1, X_2, Y_1, Y_2,Coords
+        
         m = size(A, dim=1) 
         n = size(A, dim=2) 
         transpos = .FALSE.
@@ -29,49 +29,95 @@ module Homework
             endif
 
         allocate(current_column(m))
-
-
-        max_sum=-1e+308
+   
+        max_sum=-huge(0d0)
         x1=1
         y1=1
         x2=1
         y2=1
 
-        
-!$OMP PARALLEL  DO  SCHEDULE(dynamic) private(L,R,current_column,current_sum,Up,Down)
- 
+
+
+
+
+   
+!$OMP PARALLEL
+       
+!$OMP single
+         amount_of_threads=omp_get_num_threads()
+           allocate(max_sum_arr(amount_of_threads))
+           allocate(X_1(amount_of_threads))
+            allocate(X_2(amount_of_threads))
+            allocate(Y_1(amount_of_threads))
+            allocate(Y_2(amount_of_threads))
+                max_sum_arr=-huge(0d0)
+                X_1=1
+                X_2=1
+                Y_1=1
+                Y_2=1
+
+
+!$OMP end single
+  !$OMP   DO  SCHEDULE(dynamic) private(L,R,current_column,current_sum,Up,Down,x1,x2,y1,y2,num_thread,max_sum)
+
         do L=1, n
        
             current_column = B(:, L) 
               
-            do R=L,n
+             do R=L,n
  
                 if (R > L) then 
                     current_column = current_column + B(:, R)
                 endif
                 
                 call FindMaxInArray(current_column, current_sum, Up, Down) 
-
-
               
                 if (current_sum > max_sum) then
                     max_sum = current_sum
-                    x1 = Up
-                    x2 = Down
-                    y1 = L
-                    y2 = R
+                   ! x1 = Up
+                   ! x2 = Down
+                   ! y1 = L
+                   ! y2 = R
+                    
+                     num_thread=omp_get_thread_num()+1
+                    
+                   
+                    max_sum_arr(num_thread)=max_sum
+                    X_1(num_thread)=Up
+                    X_2(num_thread)=Down
+                    Y_1(num_thread)=L
+                    Y_2(num_thread)=R
+                    
                 endif
               
  
         end do
        
    end do     
-        
-!$OMP END PARALLEL DO  
+      
+!$OMP END DO  
+!$OMP END PARALLEL
 
         deallocate(current_column)
+        max_sum=maxval(max_sum_arr)
+        
+        do i=1,amount_of_threads
+            if(max_sum_arr(i)==max_sum) then
+                 exit
+                 endif
+        enddo
+      
+        x1=X_1(i)
+        x2=X_2(i)
+        y1=Y_1(i)
+        y2=Y_2(i)
 
-
+        deallocate(max_sum_arr)
+        deallocate(X_1)
+        deallocate(X_2)
+        deallocate(Y_1)
+        deallocate(Y_2)
+     
         if (transpos) then  
             tmp = x1
             x1 = y1
@@ -114,12 +160,11 @@ module Homework
                 endif
 
             enddo
-             
+    
 
         end subroutine FindMaxInArray
 
 
 end module Homework
-
 
 
