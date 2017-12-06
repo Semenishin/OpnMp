@@ -47,7 +47,7 @@ module Homework
              Y_1=1
              Y_2=1
     !$OMP end single
-    !$OMP   DO  SCHEDULE(dynamic) private(L,R,current_column,current_sum,Up,Down,x1,x2,y1,y2,num_thread,max_sum)
+    !$OMP   DO  SCHEDULE(dynamic) private(L,R,current_column,current_sum,Up,Down,x1,x2,y1,y2,num_thread) firstprivate(max_sum)
         do L=1, n
             current_column = B(:, L) 
             do R=L,n
